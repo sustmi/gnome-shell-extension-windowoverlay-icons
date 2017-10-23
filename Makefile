@@ -22,6 +22,8 @@ locales: $(po_files)
 
 zip: all
 	zip -rq windowoverlay-icons.zip \
+		COPYING \
+		README.md \
 		*.js \
 		metadata.json \
 		prefs.xml \
