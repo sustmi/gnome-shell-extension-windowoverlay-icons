@@ -14,14 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-const Mainloop = imports.mainloop;
 const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 const Gdk = imports.gi.Gdk;
-const Clutter = imports.gi.Clutter;
 
-const Config = imports.misc.config;
-const Main = imports.ui.main;
 const Tweener = imports.tweener.tweener;
 const Workspace = imports.ui.workspace;
 
