@@ -62,10 +62,15 @@ function enable() {
     
     wsWinOverInjections['_init'] = injectToFunction(Workspace.WindowOverlay.prototype, '_init', function(windowClone, parentActor) {
         this._windowOverlayIconsExtension = {};
-        
+
         this._windowOverlayIconsExtension.box = new St.Bin({ style_class: 'windowoverlay-application-icon-box' });
         this._windowOverlayIconsExtension.box.set_opacity(settings.get_int('icon-opacity-blur'));
-        
+
+        this._windowOverlayIconsExtension.mipmap_size = null;
+
+        let result;
+        let background_color;
+
         [result, background_color] = Gdk.color_parse(settings.get_string('background-color'));
         if (result) {
             this._windowOverlayIconsExtension.box.style = 'background-color: rgba(' +
