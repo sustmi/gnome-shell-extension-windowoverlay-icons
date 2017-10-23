@@ -1,0 +1,9 @@
+{
+    "shell-version": ["3.8", "3.10", "3.12", "3.14", "3.16", "3.18", "3.20", "3.22"],
+    "uuid": "windowoverlay-icons@sustmidown.centrum.cz",
+    "name": "WindowOverlay Icons",
+    "description": "Add application icons to window overview",
+    "url": "https://github.com/sustmi/gnome-shell-extensions-sustmi/tree/master/windowoverlay-icons",
+    "settings-schema": "org.gnome.shell.extensions.windowoverlay-icons",
+    "gettext-domain": "windowoverlay-icons"
+}

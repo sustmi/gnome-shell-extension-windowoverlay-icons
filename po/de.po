@@ -1,0 +1,40 @@
+# This file is distributed under the same license as the PACKAGE package.
+# Jonatan Zeidler <jonatan_zeidler@gmx.de>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: windowoverlay-icons\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-24 18:38+0100\n"
+"PO-Revision-Date: 2013-05-21 11:47+0100\n"
+"Last-Translator: Jonatan Zeidler <jonatan_zeidler@hotmail.de>\n"
+"Language-Team: German <jonatan_zeidler@gmx.de>\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: ../prefs.xml:100
+msgid "Size:"
+msgstr "Symbolgröße:"
+
+#: ../prefs.xml:132
+msgid "Relative"
+msgstr "Relativ"
+
+#: ../prefs.xml:161
+msgid "Background color:"
+msgstr "Hintergrundfarbe:"
+
+#: ../prefs.xml:178
+msgid "Alignment:"
+msgstr "Position:"
+
+#: ../prefs.xml:406
+msgid "Icon opacity - focus:"
+msgstr "Symboltransparenz - Fokus:"
+
+#: ../prefs.xml:423
+msgid "Icon opacity - blur:"
+msgstr "Symboltransparenz - Sonst:"

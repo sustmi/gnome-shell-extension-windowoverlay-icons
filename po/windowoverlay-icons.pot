@@ -1,0 +1,43 @@
+# This file is distributed under the same license as the PACKAGE package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: windowoverlay-icons\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-15 18:27+0200\n"
+"PO-Revision-Date: 2013-03-24 18:38+0100\n"
+"Last-Translator: Miroslav Šustek <sustmidown@centrum.cz>\n"
+"Language-Team: Miroslav Šustek <sustmidown@centrum.cz>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: schemas\n"
+
+#: prefs.xml:100
+msgid "Size:"
+msgstr ""
+
+#: prefs.xml:132
+msgid "Relative"
+msgstr ""
+
+#: prefs.xml:161
+msgid "Background color:"
+msgstr ""
+
+#: prefs.xml:178
+msgid "Alignment:"
+msgstr ""
+
+#: prefs.xml:405
+msgid "Icon opacity - focus:"
+msgstr ""
+
+#: prefs.xml:422
+msgid "Icon opacity - blur:"
+msgstr ""

@@ -1,0 +1,40 @@
+# This file is distributed under the same license as the PACKAGE package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: windowoverlay-icons\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-24 18:38+0100\n"
+"PO-Revision-Date: 2017-04-20 08:59+0200\n"
+"Last-Translator: Miroslav Šustek <sustmidown@centrum.cz>\n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../prefs.xml:100
+msgid "Size:"
+msgstr "Dimensione:"
+
+#: ../prefs.xml:132
+msgid "Relative"
+msgstr "Relativo"
+
+#: ../prefs.xml:161
+msgid "Background color:"
+msgstr "Colore dello sfondo:"
+
+#: ../prefs.xml:178
+msgid "Alignment:"
+msgstr "Allineamento:"
+
+#: ../prefs.xml:406
+msgid "Icon opacity - focus:"
+msgstr "Opacità dell'icona - focus:"
+
+#: ../prefs.xml:423
+msgid "Icon opacity - blur:"
+msgstr "Opacità dell'icona - blur:"

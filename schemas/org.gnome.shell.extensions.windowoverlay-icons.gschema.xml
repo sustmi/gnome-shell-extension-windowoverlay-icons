@@ -1,0 +1,48 @@
+<schemalist gettext-domain="windowoverlay-icons">
+  <enum id="org.gnome.shell.extensions.windowoverlay-icons.icon-horizontal-alignment">
+    <value value="1" nick="left"/>
+    <value value="2" nick="middle"/>
+    <value value="3" nick="right"/>
+  </enum>
+  <enum id="org.gnome.shell.extensions.windowoverlay-icons.icon-vertical-alignment">
+    <value value="1" nick="top"/>
+    <value value="2" nick="middle"/>
+    <value value="3" nick="bottom"/>
+  </enum>
+  
+  <schema id="org.gnome.shell.extensions.windowoverlay-icons" path="/org/gnome/shell/extensions/windowoverlay-icons/">
+		<key name="icon-size" type="i">
+      <range min="0" />
+      <default>32</default>
+    </key>
+    <key name="icon-size-relative" type="b">
+      <default>false</default>
+    </key>
+    
+    <key name="icon-opacity-focus" type="i">
+      <range min="0" max="255" />
+      <default>50</default>
+    </key>
+    <key name="icon-opacity-blur" type="i">
+      <range min="0" max="255" />
+      <default>200</default>
+    </key>
+    
+    <key name="background-color" type="s">
+      <default>"#000"</default>
+    </key>
+    <key name="background-alpha" type="i">
+      <range min="0" max="65535" />
+      <default>50000</default>
+    </key>
+    
+    <key name="icon-horizontal-alignment" enum="org.gnome.shell.extensions.windowoverlay-icons.icon-horizontal-alignment">
+      <default>"right"</default>
+      <summary>Horizontal alignment of window icon</summary>
+    </key>
+    <key name="icon-vertical-alignment" enum="org.gnome.shell.extensions.windowoverlay-icons.icon-vertical-alignment">
+      <default>"bottom"</default>
+      <summary>Vertical alignment of window icon</summary>
+    </key>
+  </schema>
+</schemalist>

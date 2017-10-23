@@ -1,0 +1,6 @@
+locale/*
+schemas/*.compiled
+windowoverlay-icons.zip
+
+!.gitignore
+!.gitkeep
