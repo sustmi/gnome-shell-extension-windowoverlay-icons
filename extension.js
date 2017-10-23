@@ -83,6 +83,12 @@ function enable() {
         
         createdActors.push(this._windowOverlayIconsExtension.box);
         parentActor.add_actor(this._windowOverlayIconsExtension.box);
+
+        // Draw the icon below title and close button but above the border.
+        // This makes cases when the icon is bigger than window overlay look better.
+        parentActor.set_child_above_sibling(this.title, this._windowOverlayIconsExtension.box);
+        parentActor.set_child_above_sibling(this.closeButton, this._windowOverlayIconsExtension.box);
+        parentActor.set_child_below_sibling(this.border, this._windowOverlayIconsExtension.box);
     });
     
     wsWinOverInjections['hide'] = injectToFunction(Workspace.WindowOverlay.prototype, 'hide', function() {

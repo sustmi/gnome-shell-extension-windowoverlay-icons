@@ -13,7 +13,7 @@
   <schema id="org.gnome.shell.extensions.windowoverlay-icons" path="/org/gnome/shell/extensions/windowoverlay-icons/">
 		<key name="icon-size" type="i">
       <range min="0" />
-      <default>32</default>
+      <default>128</default>
     </key>
     <key name="icon-size-relative" type="b">
       <default>false</default>
@@ -21,7 +21,7 @@
     
     <key name="icon-opacity-focus" type="i">
       <range min="0" max="255" />
-      <default>50</default>
+      <default>255</default>
     </key>
     <key name="icon-opacity-blur" type="i">
       <range min="0" max="255" />
@@ -33,15 +33,15 @@
     </key>
     <key name="background-alpha" type="i">
       <range min="0" max="65535" />
-      <default>50000</default>
+      <default>0</default>
     </key>
     
     <key name="icon-horizontal-alignment" enum="org.gnome.shell.extensions.windowoverlay-icons.icon-horizontal-alignment">
-      <default>"right"</default>
+      <default>"middle"</default>
       <summary>Horizontal alignment of window icon</summary>
     </key>
     <key name="icon-vertical-alignment" enum="org.gnome.shell.extensions.windowoverlay-icons.icon-vertical-alignment">
-      <default>"bottom"</default>
+      <default>"middle"</default>
       <summary>Vertical alignment of window icon</summary>
     </key>
   </schema>
