@@ -113,6 +113,9 @@ function enable() {
     });
     
     let updatePositions = function(cloneX, cloneY, cloneWidth, cloneHeight, animate) {
+        // Stop the current animations first in order to prevent race conditions
+        Tweener.removeTweens(this._windowOverlayIconsExtension.box);
+
         let icon_size = settings.get_int('icon-size');
         let icon_size_relative = settings.get_boolean('icon-size-relative');
         
