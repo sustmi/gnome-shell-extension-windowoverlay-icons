@@ -54,8 +54,8 @@ function enable() {
     wsWinOverInjections['_init'] = undefined;
     wsWinOverInjections['hide'] = undefined;
     wsWinOverInjections['show'] = undefined;
-    wsWinOverInjections['_onEnter'] = undefined;
-    wsWinOverInjections['_onLeave'] = undefined;
+    wsWinOverInjections['_onShowChrome'] = undefined;
+    wsWinOverInjections['_onHideChrome'] = undefined;
     wsWinOverInjections['updatePositions'] = undefined;
     wsWinOverInjections['relayout'] = undefined;
     wsWinOverInjections['_onDestroy'] = undefined;
@@ -100,13 +100,13 @@ function enable() {
         this._windowOverlayIconsExtension.box.show();
     });
     
-    wsWinOverInjections['_onEnter'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onEnter', function() {
+    wsWinOverInjections['_onShowChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onShowChrome', function() {
         Tweener.addTween(this._windowOverlayIconsExtension.box, { time: 0.2,
                                                                   opacity: settings.get_int('icon-opacity-focus'),
                                                                   transition: 'linear' });
         
     });
-    wsWinOverInjections['_onLeave'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onLeave', function() {
+    wsWinOverInjections['_onHideChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onHideChrome', function() {
         Tweener.addTween(this._windowOverlayIconsExtension.box, { time: 0.2,
                                                                   opacity: settings.get_int('icon-opacity-blur'),
                                                                   transition: 'linear' });
