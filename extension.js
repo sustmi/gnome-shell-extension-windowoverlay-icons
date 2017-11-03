@@ -95,7 +95,7 @@ function enable() {
         }
     });
     
-    wsWinOverInjections['_onEnter'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onEnter', function() {
+    wsWinOverInjections['_onShowChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onShowChrome', function() {
         if (this._windowOverlayIconsExtension) {
             Tweener.addTween(this._windowOverlayIconsExtension.box, {
                 time: 0.2,
@@ -105,7 +105,7 @@ function enable() {
         }
     });
 
-    wsWinOverInjections['_onLeave'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onLeave', function() {
+    wsWinOverInjections['_onHideChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onHideChrome', function() {
         if (this._windowOverlayIconsExtension) {
             Tweener.addTween(this._windowOverlayIconsExtension.box, {
                 time: 0.2,
