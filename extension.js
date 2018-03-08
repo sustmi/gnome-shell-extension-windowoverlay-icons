@@ -151,7 +151,7 @@ function enable() {
         }
         
         // request new icon size
-        if (this._windowOverlayIconsExtension.mipmap_size != icon_mipmap_size || refreshIcon) {
+        if (this._windowOverlayIconsExtension.mipmap_size !== icon_mipmap_size || refreshIcon) {
             if (this._windowOverlayIconsExtension.icon) {
                 this._windowOverlayIconsExtension.box.remove_actor(this._windowOverlayIconsExtension.icon);
             }
