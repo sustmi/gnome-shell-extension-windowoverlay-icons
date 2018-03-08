@@ -84,23 +84,35 @@ function enable() {
     });
     
     wsWinOverInjections['hide'] = injectToFunction(Workspace.WindowOverlay.prototype, 'hide', function() {
-        this._windowOverlayIconsExtension.box.hide();
+        if (this._windowOverlayIconsExtension) {
+            this._windowOverlayIconsExtension.box.hide();
+        }
     });
     
     wsWinOverInjections['show'] = injectToFunction(Workspace.WindowOverlay.prototype, 'show', function() {
-        this._windowOverlayIconsExtension.box.show();
+        if (this._windowOverlayIconsExtension) {
+            this._windowOverlayIconsExtension.box.show();
+        }
     });
     
     wsWinOverInjections['_onEnter'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onEnter', function() {
-        Tweener.addTween(this._windowOverlayIconsExtension.box, { time: 0.2,
-                                                                  opacity: settings.get_int('icon-opacity-focus'),
-                                                                  transition: 'linear' });
+        if (this._windowOverlayIconsExtension) {
+            Tweener.addTween(this._windowOverlayIconsExtension.box, {
+                time: 0.2,
+                opacity: settings.get_int('icon-opacity-focus'),
+                transition: 'linear'
+            });
+        }
     });
 
     wsWinOverInjections['_onLeave'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onLeave', function() {
-        Tweener.addTween(this._windowOverlayIconsExtension.box, { time: 0.2,
-                                                                  opacity: settings.get_int('icon-opacity-blur'),
-                                                                  transition: 'linear' });
+        if (this._windowOverlayIconsExtension) {
+            Tweener.addTween(this._windowOverlayIconsExtension.box, {
+                time: 0.2,
+                opacity: settings.get_int('icon-opacity-blur'),
+                transition: 'linear'
+            });
+        }
     });
     
     let updatePositions = function(cloneX, cloneY, cloneWidth, cloneHeight, animate) {
@@ -200,12 +212,16 @@ function enable() {
     };
     
     wsWinOverInjections['relayout'] = injectToFunction(Workspace.WindowOverlay.prototype, 'relayout', function(animate) {
-        let [cloneX, cloneY, cloneWidth, cloneHeight] = this._windowClone.slot;
-        updatePositions.call(this, cloneX, cloneY, cloneWidth, cloneHeight, animate);
+        if (this._windowOverlayIconsExtension) {
+            let [cloneX, cloneY, cloneWidth, cloneHeight] = this._windowClone.slot;
+            updatePositions.call(this, cloneX, cloneY, cloneWidth, cloneHeight, animate);
+        }
     });
 
     wsWinOverInjections['_onDestroy'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onDestroy', function() {
-        this._windowOverlayIconsExtension.box.destroy();
+        if (this._windowOverlayIconsExtension) {
+            this._windowOverlayIconsExtension.box.destroy();
+        }
     });
 
 }
