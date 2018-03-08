@@ -243,8 +243,8 @@ function disable() {
     for (let i in wsWinOverInjections) {
         removeInjection(Workspace.WindowOverlay.prototype, wsWinOverInjections, i);
     }
-    for each (let i in createdActors) {
-        i.destroy();
+    for (let i in createdActors) {
+        createdActors[i].destroy();
     }
     resetState();
 }
