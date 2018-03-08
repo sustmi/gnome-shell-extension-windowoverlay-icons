@@ -44,21 +44,12 @@ let createdActors;
 let settings;
 
 function resetState() {
-    wsWinOverInjections = { };
-    createdActors = [ ];
+    wsWinOverInjections = {};
+    createdActors = [];
 }
 
 function enable() {
     resetState();
-    
-    wsWinOverInjections['_init'] = undefined;
-    wsWinOverInjections['hide'] = undefined;
-    wsWinOverInjections['show'] = undefined;
-    wsWinOverInjections['_onEnter'] = undefined;
-    wsWinOverInjections['_onLeave'] = undefined;
-    wsWinOverInjections['updatePositions'] = undefined;
-    wsWinOverInjections['relayout'] = undefined;
-    wsWinOverInjections['_onDestroy'] = undefined;
     
     wsWinOverInjections['_init'] = injectToFunction(Workspace.WindowOverlay.prototype, '_init', function(windowClone, parentActor) {
         this._windowOverlayIconsExtension = {};
@@ -104,8 +95,8 @@ function enable() {
         Tweener.addTween(this._windowOverlayIconsExtension.box, { time: 0.2,
                                                                   opacity: settings.get_int('icon-opacity-focus'),
                                                                   transition: 'linear' });
-        
     });
+
     wsWinOverInjections['_onLeave'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onLeave', function() {
         Tweener.addTween(this._windowOverlayIconsExtension.box, { time: 0.2,
                                                                   opacity: settings.get_int('icon-opacity-blur'),
