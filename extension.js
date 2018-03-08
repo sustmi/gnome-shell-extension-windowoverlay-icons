@@ -240,8 +240,8 @@ function removeInjection(objectPrototype, injection, functionName) {
 }
 
 function disable() {
-    for (let i in wsWinOverInjections) {
-        removeInjection(Workspace.WindowOverlay.prototype, wsWinOverInjections, i);
+    for (let functionName in wsWinOverInjections) {
+        removeInjection(Workspace.WindowOverlay.prototype, wsWinOverInjections, functionName);
     }
     for (let i in createdActors) {
         createdActors[i].destroy();
