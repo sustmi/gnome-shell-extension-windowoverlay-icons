@@ -39,22 +39,42 @@ const VerticalAlignment = {
     BOTTOM: 3
 };
 
-let wsWinOverInjections;
-let createdActors;
+let windowOverlayInjections;
+let extendedInstances;
 let settings;
 
+function registerExtendedInstance(instance) {
+    extendedInstances.push(instance);
+}
+
+function removeExtensionFromAllExtendedInstances() {
+    extendedInstances.forEach(function (instance) {
+        if (instance._windowOverlayIconsExtension) {
+            if (instance._windowOverlayIconsExtension.box) {
+                instance._windowOverlayIconsExtension.box.destroy();
+                instance._windowOverlayIconsExtension.box = null;
+            }
+            instance._windowOverlayIconsExtension = null;
+        }
+    });
+}
+
 function resetState() {
-    wsWinOverInjections = {};
-    createdActors = [];
+    windowOverlayInjections = {};
+    extendedInstances = [];
 }
 
 function enable() {
     resetState();
     
-    wsWinOverInjections['_init'] = injectToFunction(Workspace.WindowOverlay.prototype, '_init', function(windowClone, parentActor) {
+    windowOverlayInjections['_init'] = injectToFunction(Workspace.WindowOverlay.prototype, '_init', function(windowClone, parentActor) {
         this._windowOverlayIconsExtension = {};
 
         this._windowOverlayIconsExtension.box = new St.Bin({ style_class: 'windowoverlay-application-icon-box' });
+        this._windowOverlayIconsExtension.box.connect('destroy', () => {
+            this._windowOverlayIconsExtension.box = null;
+        });
+
         this._windowOverlayIconsExtension.box.set_opacity(settings.get_int('icon-opacity-blur'));
 
         this._windowOverlayIconsExtension.mipmap_size = null;
@@ -73,7 +93,6 @@ function enable() {
         
         Shell.util_set_hidden_from_pick(this._windowOverlayIconsExtension.box, true);
         
-        createdActors.push(this._windowOverlayIconsExtension.box);
         parentActor.add_actor(this._windowOverlayIconsExtension.box);
 
         // Draw the icon below title and close button but above the border.
@@ -81,22 +100,24 @@ function enable() {
         parentActor.set_child_above_sibling(this.title, this._windowOverlayIconsExtension.box);
         parentActor.set_child_above_sibling(this.closeButton, this._windowOverlayIconsExtension.box);
         parentActor.set_child_below_sibling(this.border, this._windowOverlayIconsExtension.box);
+
+        registerExtendedInstance(this);
     });
     
-    wsWinOverInjections['hide'] = injectToFunction(Workspace.WindowOverlay.prototype, 'hide', function() {
-        if (this._windowOverlayIconsExtension) {
+    windowOverlayInjections['hide'] = injectToFunction(Workspace.WindowOverlay.prototype, 'hide', function() {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
             this._windowOverlayIconsExtension.box.hide();
         }
     });
     
-    wsWinOverInjections['show'] = injectToFunction(Workspace.WindowOverlay.prototype, 'show', function() {
-        if (this._windowOverlayIconsExtension) {
+    windowOverlayInjections['show'] = injectToFunction(Workspace.WindowOverlay.prototype, 'show', function() {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
             this._windowOverlayIconsExtension.box.show();
         }
     });
     
-    wsWinOverInjections['_onShowChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onShowChrome', function() {
-        if (this._windowOverlayIconsExtension) {
+    windowOverlayInjections['_onShowChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onShowChrome', function() {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
             Tweener.addTween(this._windowOverlayIconsExtension.box, {
                 time: 0.2,
                 opacity: settings.get_int('icon-opacity-focus'),
@@ -105,8 +126,8 @@ function enable() {
         }
     });
 
-    wsWinOverInjections['_onHideChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onHideChrome', function() {
-        if (this._windowOverlayIconsExtension) {
+    windowOverlayInjections['_onHideChrome'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onHideChrome', function() {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
             Tweener.addTween(this._windowOverlayIconsExtension.box, {
                 time: 0.2,
                 opacity: settings.get_int('icon-opacity-blur'),
@@ -205,21 +226,24 @@ function enable() {
         }
         
         if (animate) {
-            this._animateOverlayActor(this._windowOverlayIconsExtension.box, Math.floor(iconX), Math.floor(iconY), this._windowOverlayIconsExtension.box.width);
+            this._animateOverlayActor(this._windowOverlayIconsExtension.box,
+                                      Math.floor(iconX),
+                                      Math.floor(iconY),
+                                      this._windowOverlayIconsExtension.box.width);
         } else {
             this._windowOverlayIconsExtension.box.set_position(Math.floor(iconX), Math.floor(iconY));
         }
     };
     
-    wsWinOverInjections['relayout'] = injectToFunction(Workspace.WindowOverlay.prototype, 'relayout', function(animate) {
-        if (this._windowOverlayIconsExtension) {
+    windowOverlayInjections['relayout'] = injectToFunction(Workspace.WindowOverlay.prototype, 'relayout', function(animate) {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
             let [cloneX, cloneY, cloneWidth, cloneHeight] = this._windowClone.slot;
             updatePositions.call(this, cloneX, cloneY, cloneWidth, cloneHeight, animate);
         }
     });
 
-    wsWinOverInjections['_onDestroy'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onDestroy', function() {
-        if (this._windowOverlayIconsExtension) {
+    windowOverlayInjections['_onDestroy'] = injectToFunction(Workspace.WindowOverlay.prototype, '_onDestroy', function() {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
             this._windowOverlayIconsExtension.box.destroy();
         }
     });
@@ -256,12 +280,10 @@ function removeInjection(objectPrototype, injection, functionName) {
 }
 
 function disable() {
-    for (let functionName in wsWinOverInjections) {
-        removeInjection(Workspace.WindowOverlay.prototype, wsWinOverInjections, functionName);
+    for (let functionName in windowOverlayInjections) {
+        removeInjection(Workspace.WindowOverlay.prototype, windowOverlayInjections, functionName);
     }
-    for (let i in createdActors) {
-        createdActors[i].destroy();
-    }
+    removeExtensionFromAllExtendedInstances();
     resetState();
 }
 
