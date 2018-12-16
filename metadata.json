@@ -1,5 +1,5 @@
 {
-    "shell-version": ["3.26"],
+    "shell-version": ["3.26", "3.28", "3.30"],
     "uuid": "windowoverlay-icons@sustmidown.centrum.cz",
     "name": "WindowOverlay Icons",
     "description": "Add application icons to window overview",
