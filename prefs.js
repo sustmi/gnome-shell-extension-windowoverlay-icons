@@ -47,13 +47,12 @@ function getErrorLabel(message) {
     return label;
 }
 
-const WindowOverlayIcosExtensionPrefsWidget = new GObject.Class({
-    Name: 'WindowOverlayIconsExtension.Prefs.Widget',
-    GTypeName: 'WindowOverlayIconsExtensionPrefsWidget',
-    Extends: Gtk.Box,
-    
-    _init: function(params) {
-        this.parent(params);
+const WindowOverlayIcosExtensionPrefsWidget = GObject.registerClass(
+    class WindowOverlayIconsExtension_Prefs_Widget
+    extends Gtk.Box
+{
+    _init(params) {
+        super._init(params);
         
         try {
             this._settings = Convenience.getSettings(PREFS_SCHEMA);
@@ -86,9 +85,9 @@ const WindowOverlayIcosExtensionPrefsWidget = new GObject.Class({
         this._connectSignals(builder);
         
         this.add(this._mainGrid);
-    },
+    }
     
-    _fillData: function(builder) {
+    _fillData(builder) {
         let h = this._settings.get_enum('icon-horizontal-alignment');
         let v = this._settings.get_enum('icon-vertical-alignment');
         this._icon_alignment.current_value = 3 * (v - 1) + h;
@@ -96,7 +95,7 @@ const WindowOverlayIcosExtensionPrefsWidget = new GObject.Class({
         this._icon_size.value = this._settings.get_int('icon-size');
         this._icon_size_relative.active = this._settings.get_boolean('icon-size-relative');
         
-        [result, background_color] = Gdk.color_parse(this._settings.get_string('background-color'));
+        let [result, background_color] = Gdk.color_parse(this._settings.get_string('background-color'));
         if (result) {
             this._background_color.color = background_color;
         }
@@ -104,9 +103,9 @@ const WindowOverlayIcosExtensionPrefsWidget = new GObject.Class({
         
         this._icon_opacity_focus.value = this._settings.get_int('icon-opacity-focus');
         this._icon_opacity_blur.value = this._settings.get_int('icon-opacity-blur');
-    },
+    }
     
-    _connectSignals: function(builder) {
+    _connectSignals(builder) {
         this._icon_alignment.connect('changed', Lang.bind(this, function(action, current) {
             let h, v;
             switch (current.value) {
