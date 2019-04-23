@@ -43,6 +43,8 @@ let windowOverlayInjections;
 let extendedInstances;
 let settings;
 
+const windowOverlayBase = Workspace.WindowOverlay;
+
 function registerExtendedInstance(instance) {
     extendedInstances.push(instance);
 }
@@ -67,7 +69,10 @@ function resetState() {
 function enable() {
     resetState();
     
-    windowOverlayInjections['_init'] = injectToFunction(Workspace.WindowOverlay.prototype, '_init', function(windowClone, parentActor) {
+    Workspace.WindowOverlay = class extends windowOverlayBase {
+      constructor(windowClone, parentActor) {            
+        super(windowClone, parentActor);
+
         this._windowOverlayIconsExtension = {};
 
         this._windowOverlayIconsExtension.box = new St.Bin({ style_class: 'windowoverlay-application-icon-box' });
@@ -102,7 +107,9 @@ function enable() {
         parentActor.set_child_below_sibling(this.border, this._windowOverlayIconsExtension.box);
 
         registerExtendedInstance(this);
-    });
+      }
+    };
+    Workspace.WindowOverlay.prototype = windowOverlayBase.prototype;
     
     windowOverlayInjections['hide'] = injectToFunction(Workspace.WindowOverlay.prototype, 'hide', function() {
         if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
@@ -285,6 +292,7 @@ function disable() {
     }
     removeExtensionFromAllExtendedInstances();
     resetState();
+    Workspace.WindowOverlay.prototype = windowOverlayBase;
 }
 
 function init() {
