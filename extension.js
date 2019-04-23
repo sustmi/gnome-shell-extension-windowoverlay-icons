@@ -188,7 +188,6 @@ function enable() {
             }
             if (!this._windowOverlayIconsExtension.icon) {
                 // fallback to default icon
-                let texture_cache = St.TextureCache.get_default();
                 this._windowOverlayIconsExtension.icon = new St.Icon({ icon_name: 'application-x-executable',
                                                                        icon_size: icon_mipmap_size });
             }
