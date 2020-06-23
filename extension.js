@@ -146,7 +146,8 @@ function enable() {
         // Stop the current animations first in order to prevent race conditions
         Tweener.removeTweens(this._windowOverlayIconsExtension.box);
 
-        let icon_size = settings.get_int('icon-size');
+        let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        let icon_size = settings.get_int('icon-size') * scale;
         let icon_size_relative = settings.get_boolean('icon-size-relative');
 
         let clone_size = Math.min(cloneWidth, cloneHeight);
