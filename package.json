@@ -1,0 +1,23 @@
+{
+  "name": "gnome-shell-extension-windowoverlay-icons",
+  "description": "Add application icons to window overview",
+  "main": "extension.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.11.0"
+  },
+  "scripts": {
+    "check": "eslint --format codeframe *.js",
+    "fix": "eslint --format codeframe --fix *.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sustmi/gnome-shell-extension-windowoverlay-icons.git"
+  },
+  "author": "Miroslav Sustek",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/sustmi/gnome-shell-extension-windowoverlay-icons/issues"
+  },
+  "homepage": "https://github.com/sustmi/gnome-shell-extension-windowoverlay-icons#readme"
+}

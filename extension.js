@@ -1,3 +1,5 @@
+/* exported enable, disable, init, main */
+
 // Application icons for windows in Activities overview in Gnome-shell.
 // Copyright (C) 2011 Miroslav Sustek
 
@@ -30,13 +32,13 @@ const PREFS_SCHEMA = 'org.gnome.shell.extensions.windowoverlay-icons';
 const HorizontalAlignment = {
     LEFT: 1,
     MIDDLE: 2,
-    RIGHT: 3
+    RIGHT: 3,
 };
 
 const VerticalAlignment = {
     TOP: 1,
     MIDDLE: 2,
-    BOTTOM: 3
+    BOTTOM: 3,
 };
 
 let originalWindowOverlay;
@@ -47,8 +49,8 @@ function enable() {
     originalWindowOverlay = Workspace.WindowOverlay;
 
     Workspace.WindowOverlay = class extends originalWindowOverlay {
-        constructor(windowClone, parentActor) {
-            super(...arguments);
+        constructor(windowClone, parentActor, ...restArgs) {
+            super(windowClone, parentActor, ...restArgs);
 
             this._windowOverlayIconsExtension = {};
 
@@ -62,15 +64,15 @@ function enable() {
             this._windowOverlayIconsExtension.mipmap_size = null;
 
             let result;
-            let background_color;
+            let backgroundColor;
 
-            [result, background_color] = Gdk.color_parse(settings.get_string('background-color'));
+            [result, backgroundColor] = Gdk.color_parse(settings.get_string('background-color'));
             if (result) {
-                this._windowOverlayIconsExtension.box.style = 'background-color: rgba(' +
-                    (background_color.red / 65536 * 256) + ', ' +
-                    (background_color.green / 65536 * 256) + ', ' +
-                    (background_color.blue / 65536 * 256) + ', ' +
-                    (settings.get_int('background-alpha') / 65536 * 256) + ')';
+                this._windowOverlayIconsExtension.box.style = `background-color: rgba(${
+                    backgroundColor.red / 65536 * 256}, ${
+                    backgroundColor.green / 65536 * 256}, ${
+                    backgroundColor.blue / 65536 * 256}, ${
+                    settings.get_int('background-alpha') / 65536 * 256})`;
             }
 
             Shell.util_set_hidden_from_pick(this._windowOverlayIconsExtension.box, true);
@@ -84,48 +86,46 @@ function enable() {
             parentActor.set_child_below_sibling(this.border, this._windowOverlayIconsExtension.box);
         }
 
-        hide() {
-            super.hide(...arguments);
+        hide(...args) {
+            super.hide(...args);
 
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
+            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
                 this._windowOverlayIconsExtension.box.hide();
-            }
         }
 
-        show() {
-            super.show(...arguments);
+        show(...args) {
+            super.show(...args);
 
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
+            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
                 this._windowOverlayIconsExtension.box.show();
-            }
         }
 
-        _onShowChrome() {
-            super._onShowChrome(...arguments);
+        _onShowChrome(...args) {
+            super._onShowChrome(...args);
 
             if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
                 Tweener.addTween(this._windowOverlayIconsExtension.box, {
                     time: 0.2,
                     opacity: settings.get_int('icon-opacity-focus'),
-                    transition: 'linear'
+                    transition: 'linear',
                 });
             }
         }
 
-        _onHideChrome() {
-            super._onHideChrome(...arguments);
+        _onHideChrome(...args) {
+            super._onHideChrome(...args);
 
             if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
                 Tweener.addTween(this._windowOverlayIconsExtension.box, {
                     time: 0.2,
                     opacity: settings.get_int('icon-opacity-blur'),
-                    transition: 'linear'
+                    transition: 'linear',
                 });
             }
         }
 
-        relayout(animate) {
-            super.relayout(...arguments);
+        relayout(animate, ...restArgs) {
+            super.relayout(animate, ...restArgs);
 
             if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
                 let [cloneX, cloneY, cloneWidth, cloneHeight] = this._windowClone.slot;
@@ -133,12 +133,11 @@ function enable() {
             }
         }
 
-        _onDestroy(animate) {
-            super._onDestroy(...arguments);
+        _onDestroy(animate, ...restArgs) {
+            super._onDestroy(animate, ...restArgs);
 
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
+            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
                 this._windowOverlayIconsExtension.box.destroy();
-            }
         }
     };
 
@@ -147,22 +146,21 @@ function enable() {
         Tweener.removeTweens(this._windowOverlayIconsExtension.box);
 
         let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        let icon_size = Math.floor(settings.get_int('icon-size') * scale);
-        let icon_size_relative = settings.get_boolean('icon-size-relative');
+        let iconSize = Math.floor(settings.get_int('icon-size') * scale);
+        let iconSizeRelative = settings.get_boolean('icon-size-relative');
 
-        let clone_size = Math.min(cloneWidth, cloneHeight);
+        let cloneSize = Math.min(cloneWidth, cloneHeight);
 
-        if (icon_size_relative) {
-            icon_size = Math.floor(clone_size * icon_size / 100);
-        }
+        if (iconSizeRelative)
+            iconSize = Math.floor(cloneSize * iconSize / 100);
 
-        this._windowOverlayIconsExtension.box.width = icon_size;
-        this._windowOverlayIconsExtension.box.height = icon_size;
+        this._windowOverlayIconsExtension.box.width = iconSize;
+        this._windowOverlayIconsExtension.box.height = iconSize;
 
         // Mipmapping (using square icon textures; size power of two)
-        let icon_mipmap_level = Math.log(icon_size) / Math.LN2;
+        let iconMipmapLevel = Math.log(iconSize) / Math.LN2;
         // Always minify (use texture bigger than target box)
-        let icon_mipmap_size = Math.pow(2, Math.ceil(icon_mipmap_level));
+        let iconMipmapSize = Math.pow(2, Math.ceil(iconMipmapLevel));
 
         // WORKAROUND for bug: https://extensions.gnome.org/errors/view/1334
         // > If, in overview, one moves a window to another desktop and then
@@ -173,69 +171,67 @@ function enable() {
         if (!this._windowOverlayIconsExtension.app) {
             let tracker = Shell.WindowTracker.get_default();
             this._windowOverlayIconsExtension.app = tracker.get_window_app(this._windowClone.metaWindow);
-            if (this._windowOverlayIconsExtension.app) {
+            if (this._windowOverlayIconsExtension.app)
                 refreshIcon = true;
-            }
         }
 
         // request new icon size
-        if (this._windowOverlayIconsExtension.mipmap_size !== icon_mipmap_size || refreshIcon) {
-            if (this._windowOverlayIconsExtension.icon) {
+        if (this._windowOverlayIconsExtension.mipmap_size !== iconMipmapSize || refreshIcon) {
+            if (this._windowOverlayIconsExtension.icon)
                 this._windowOverlayIconsExtension.box.remove_actor(this._windowOverlayIconsExtension.icon);
-            }
 
-            if (this._windowOverlayIconsExtension.app) {
-                this._windowOverlayIconsExtension.icon = this._windowOverlayIconsExtension.app.create_icon_texture(icon_mipmap_size);
-            }
+            if (this._windowOverlayIconsExtension.app)
+                this._windowOverlayIconsExtension.icon = this._windowOverlayIconsExtension.app.create_icon_texture(iconMipmapSize);
+
             if (!this._windowOverlayIconsExtension.icon) {
                 // fallback to default icon
                 this._windowOverlayIconsExtension.icon = new St.Icon({ icon_name: 'application-x-executable',
-                                                                       icon_size: icon_mipmap_size });
+                    icon_size: iconMipmapSize });
             }
 
             this._windowOverlayIconsExtension.box.add_actor(this._windowOverlayIconsExtension.icon);
 
-            this._windowOverlayIconsExtension.mipmap_size = icon_mipmap_size;
+            this._windowOverlayIconsExtension.mipmap_size = iconMipmapSize;
         }
 
-        this._windowOverlayIconsExtension.icon.width = icon_size - 8;
-        this._windowOverlayIconsExtension.icon.height = icon_size - 8;
+        this._windowOverlayIconsExtension.icon.width = iconSize - 8;
+        this._windowOverlayIconsExtension.icon.height = iconSize - 8;
 
         let iconX, iconY;
 
         switch (settings.get_enum('icon-horizontal-alignment')) {
-            case HorizontalAlignment.LEFT:
-                iconX = cloneX + 3;
-                break;
+        case HorizontalAlignment.LEFT:
+            iconX = cloneX + 3;
+            break;
 
-            case HorizontalAlignment.MIDDLE:
-                iconX = cloneX + (cloneWidth - this._windowOverlayIconsExtension.box.width) / 2;
-                break;
+        case HorizontalAlignment.MIDDLE:
+            iconX = cloneX + (cloneWidth - this._windowOverlayIconsExtension.box.width) / 2;
+            break;
 
-            case HorizontalAlignment.RIGHT:
-                iconX = cloneX + cloneWidth - this._windowOverlayIconsExtension.box.width - 3;
-                break
+        case HorizontalAlignment.RIGHT:
+            iconX = cloneX + cloneWidth - this._windowOverlayIconsExtension.box.width - 3;
+            break;
         }
 
         switch (settings.get_enum('icon-vertical-alignment')) {
-            case VerticalAlignment.TOP:
-                iconY = cloneY + 3;
-                break;
+        case VerticalAlignment.TOP:
+            iconY = cloneY + 3;
+            break;
 
-            case VerticalAlignment.MIDDLE:
-                iconY = cloneY + (cloneHeight - this._windowOverlayIconsExtension.box.height) / 2;
-                break;
+        case VerticalAlignment.MIDDLE:
+            iconY = cloneY + (cloneHeight - this._windowOverlayIconsExtension.box.height) / 2;
+            break;
 
-            case VerticalAlignment.BOTTOM:
-                iconY = cloneY + cloneHeight - this._windowOverlayIconsExtension.box.height - 3;
-                break
+        case VerticalAlignment.BOTTOM:
+            iconY = cloneY + cloneHeight - this._windowOverlayIconsExtension.box.height - 3;
+            break;
         }
 
         if (animate) {
             this._animateOverlayActor(this._windowOverlayIconsExtension.box,
-                                      Math.floor(iconX),
-                                      Math.floor(iconY),
-                                      this._windowOverlayIconsExtension.box.width);
+                Math.floor(iconX),
+                Math.floor(iconY),
+                this._windowOverlayIconsExtension.box.width);
         } else {
             this._windowOverlayIconsExtension.box.set_position(Math.floor(iconX), Math.floor(iconY));
         }
@@ -255,4 +251,4 @@ function init() {
 function main() {
     init();
     enable();
-} 
+}

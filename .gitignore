@@ -1,6 +1,8 @@
-locale/*
-schemas/*.compiled
-windowoverlay-icons.zip
+/gnome-shell-extensions/
+/locale/*
+/node_modules/
+/schemas/*.compiled
+/windowoverlay-icons.zip
 
 !.gitignore
 !.gitkeep

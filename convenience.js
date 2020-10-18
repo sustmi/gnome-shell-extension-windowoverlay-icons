@@ -1,4 +1,5 @@
 /* -*- mode: js -*- */
+/* exported initTranslations, getSettings */
 /*
   Copyright (c) 2011-2012, Giovanni Campagna <scampa.giovanni@gmail.com>
 
@@ -33,7 +34,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 /**
  * initTranslations:
- * @domain: (optional): the gettext domain to use
+ * @param {?Object} domain: the gettext domain to use
  *
  * Initialize Gettext to load translations from extensionsdir/locale.
  * If @domain is not provided, it will be taken from metadata['gettext-domain']
@@ -56,7 +57,8 @@ function initTranslations(domain) {
 
 /**
  * getSettings:
- * @schema: (optional): the GSettings schema id
+ * @param {?Object} schema: the GSettings schema id
+ * @returns {Gio.Settings}
  *
  * Builds and return a GSettings schema for @schema, using schema files
  * in extensionsdir/schemas. If @schema is not provided, it is taken from
@@ -76,17 +78,19 @@ function getSettings(schema) {
     // in the standard folders)
     let schemaDir = extension.dir.get_child('schemas');
     let schemaSource;
-    if (schemaDir.query_exists(null))
+    if (schemaDir.query_exists(null)) {
         schemaSource = GioSSS.new_from_directory(schemaDir.get_path(),
-                                                 GioSSS.get_default(),
-                                                 false);
-    else
+            GioSSS.get_default(),
+            false);
+    } else {
         schemaSource = GioSSS.get_default();
+    }
 
     let schemaObj = schemaSource.lookup(schema, true);
-    if (!schemaObj)
-        throw new Error('Schema ' + schema + ' could not be found for extension '
-                        + extension.metadata.uuid + '. Please check your installation.');
+    if (!schemaObj) {
+        throw new Error(`Schema ${schema} could not be found for extension ${
+            extension.metadata.uuid}. Please check your installation.`);
+    }
 
     return new Gio.Settings({ settings_schema: schemaObj });
 }

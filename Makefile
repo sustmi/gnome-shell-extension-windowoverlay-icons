@@ -4,11 +4,17 @@ po_files := $(wildcard ./po/*.po)
 
 .PHONY: all clean schemas zip
 
-all: schemas locales
+all: update_dependencies schemas locales
 
 clean:
 	rm -f windowoverlay-icons.zip
 	rm -f ./schemas/gschemas.compiled
+
+update_dependencies:
+	git submodule update --init
+
+check: update_dependencies
+	npm run check
 
 schemas:
 	glib-compile-schemas ./schemas
