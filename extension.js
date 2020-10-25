@@ -16,234 +16,253 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+const Clutter = imports.gi.Clutter;
+const Gdk = imports.gi.Gdk;
+const GObject = imports.gi.GObject;
 const Shell = imports.gi.Shell;
 const St = imports.gi.St;
-const Gdk = imports.gi.Gdk;
 
+const Main = imports.ui.main;
 const Tweener = imports.tweener.tweener;
-const Workspace = imports.ui.workspace;
+const WindowPreview = imports.ui.windowPreview;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const { injectAfterFunction, removeInjection } = Me.imports.libs.monkeyPatching;
+const { HorizontalAlignment, VerticalAlignment, PREFS_SCHEMA } = Me.imports.prefs;
 
-const PREFS_SCHEMA = 'org.gnome.shell.extensions.windowoverlay-icons';
+const INITIAL_ICON_SIZE = 128;
 
-const HorizontalAlignment = {
-    LEFT: 1,
-    MIDDLE: 2,
-    RIGHT: 3,
-};
-
-const VerticalAlignment = {
-    TOP: 1,
-    MIDDLE: 2,
-    BOTTOM: 3,
-};
-
-let originalWindowOverlay;
+let windowPreviewInjections = [];
 
 let settings;
 
-function enable() {
-    originalWindowOverlay = Workspace.WindowOverlay;
+const RelativeIconSizeConstraint = GObject.registerClass(
+class RelativeIconSizeConstraint extends Clutter.Constraint {
+    _init(props) {
+        this._source = props.source;
+        this._ratio = props.ratio || 1;
+        super._init();
+    }
 
-    Workspace.WindowOverlay = class extends originalWindowOverlay {
-        constructor(windowClone, parentActor, ...restArgs) {
-            super(windowClone, parentActor, ...restArgs);
+    vfunc_update_allocation(actor, actorBox) {
+        let [sourceWidth, sourceHeight] = this._source.get_size();
 
-            this._windowOverlayIconsExtension = {};
+        const size = Math.ceil(Math.min(sourceWidth, sourceHeight) * this._ratio);
 
-            this._windowOverlayIconsExtension.box = new St.Bin({ style_class: 'windowoverlay-application-icon-box' });
-            this._windowOverlayIconsExtension.box.connect('destroy', () => {
-                this._windowOverlayIconsExtension.box = null;
-            });
+        actorBox.set_size(size, size);
+    }
+});
 
-            this._windowOverlayIconsExtension.box.set_opacity(settings.get_int('icon-opacity-blur'));
+const AbsoluteIconSizeConstraint = GObject.registerClass(
+class AbsoluteIconSizeConstraint extends Clutter.Constraint {
+    _init(props) {
+        this._source = props.source;
+        this._size = props.size;
+        super._init();
+    }
 
-            this._windowOverlayIconsExtension.mipmap_size = null;
+    vfunc_update_allocation(actor, actorBox) {
+        const [sourceWidth, sourceHeight] = this._source.get_size();
 
-            let result;
-            let backgroundColor;
+        const minSize = Math.min(sourceWidth, sourceHeight, this._size);
 
-            [result, backgroundColor] = Gdk.color_parse(settings.get_string('background-color'));
-            if (result) {
-                this._windowOverlayIconsExtension.box.style = `background-color: rgba(${
-                    backgroundColor.red / 65536 * 256}, ${
-                    backgroundColor.green / 65536 * 256}, ${
-                    backgroundColor.blue / 65536 * 256}, ${
-                    settings.get_int('background-alpha') / 65536 * 256})`;
-            }
+        actorBox.set_size(minSize, minSize);
+    }
+});
 
-            Shell.util_set_hidden_from_pick(this._windowOverlayIconsExtension.box, true);
+function getHorizontalAlignmentFactorFromAlignmentSetting(horizontalAlignmentSetting) {
+    switch (horizontalAlignmentSetting) {
+    case HorizontalAlignment.LEFT:
+        return 0;
 
-            parentActor.add_actor(this._windowOverlayIconsExtension.box);
+    case HorizontalAlignment.MIDDLE:
+        return 0.5;
 
-            // Draw the icon below title and close button but above the border.
-            // This makes cases when the icon is bigger than window overlay look better.
-            parentActor.set_child_above_sibling(this.title, this._windowOverlayIconsExtension.box);
-            parentActor.set_child_above_sibling(this.closeButton, this._windowOverlayIconsExtension.box);
-            parentActor.set_child_below_sibling(this.border, this._windowOverlayIconsExtension.box);
-        }
-
-        hide(...args) {
-            super.hide(...args);
-
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
-                this._windowOverlayIconsExtension.box.hide();
-        }
-
-        show(...args) {
-            super.show(...args);
-
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
-                this._windowOverlayIconsExtension.box.show();
-        }
-
-        _onShowChrome(...args) {
-            super._onShowChrome(...args);
-
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
-                Tweener.addTween(this._windowOverlayIconsExtension.box, {
-                    time: 0.2,
-                    opacity: settings.get_int('icon-opacity-focus'),
-                    transition: 'linear',
-                });
-            }
-        }
-
-        _onHideChrome(...args) {
-            super._onHideChrome(...args);
-
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
-                Tweener.addTween(this._windowOverlayIconsExtension.box, {
-                    time: 0.2,
-                    opacity: settings.get_int('icon-opacity-blur'),
-                    transition: 'linear',
-                });
-            }
-        }
-
-        relayout(animate, ...restArgs) {
-            super.relayout(animate, ...restArgs);
-
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
-                let [cloneX, cloneY, cloneWidth, cloneHeight] = this._windowClone.slot;
-                updatePositions.call(this, cloneX, cloneY, cloneWidth, cloneHeight, animate);
-            }
-        }
-
-        _onDestroy(animate, ...restArgs) {
-            super._onDestroy(animate, ...restArgs);
-
-            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
-                this._windowOverlayIconsExtension.box.destroy();
-        }
-    };
-
-    function updatePositions(cloneX, cloneY, cloneWidth, cloneHeight, animate) {
-        // Stop the current animations first in order to prevent race conditions
-        Tweener.removeTweens(this._windowOverlayIconsExtension.box);
-
-        let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        let iconSize = Math.floor(settings.get_int('icon-size') * scale);
-        let iconSizeRelative = settings.get_boolean('icon-size-relative');
-
-        let cloneSize = Math.min(cloneWidth, cloneHeight);
-
-        if (iconSizeRelative)
-            iconSize = Math.floor(cloneSize * iconSize / 100);
-
-        this._windowOverlayIconsExtension.box.width = iconSize;
-        this._windowOverlayIconsExtension.box.height = iconSize;
-
-        // Mipmapping (using square icon textures; size power of two)
-        let iconMipmapLevel = Math.log(iconSize) / Math.LN2;
-        // Always minify (use texture bigger than target box)
-        let iconMipmapSize = Math.pow(2, Math.ceil(iconMipmapLevel));
-
-        // WORKAROUND for bug: https://extensions.gnome.org/errors/view/1334
-        // > If, in overview, one moves a window to another desktop and then
-        // > pulls it back onto the active workspace (without leaving overview),
-        // > a blank icon is displayed.
-        // IDK why, but in this situation tracker.get_window_app() returns null.
-        let refreshIcon = false;
-        if (!this._windowOverlayIconsExtension.app) {
-            let tracker = Shell.WindowTracker.get_default();
-            this._windowOverlayIconsExtension.app = tracker.get_window_app(this._windowClone.metaWindow);
-            if (this._windowOverlayIconsExtension.app)
-                refreshIcon = true;
-        }
-
-        // request new icon size
-        if (this._windowOverlayIconsExtension.mipmap_size !== iconMipmapSize || refreshIcon) {
-            if (this._windowOverlayIconsExtension.icon)
-                this._windowOverlayIconsExtension.box.remove_actor(this._windowOverlayIconsExtension.icon);
-
-            if (this._windowOverlayIconsExtension.app)
-                this._windowOverlayIconsExtension.icon = this._windowOverlayIconsExtension.app.create_icon_texture(iconMipmapSize);
-
-            if (!this._windowOverlayIconsExtension.icon) {
-                // fallback to default icon
-                this._windowOverlayIconsExtension.icon = new St.Icon({ icon_name: 'application-x-executable',
-                    icon_size: iconMipmapSize });
-            }
-
-            this._windowOverlayIconsExtension.box.add_actor(this._windowOverlayIconsExtension.icon);
-
-            this._windowOverlayIconsExtension.mipmap_size = iconMipmapSize;
-        }
-
-        this._windowOverlayIconsExtension.icon.width = iconSize - 8;
-        this._windowOverlayIconsExtension.icon.height = iconSize - 8;
-
-        let iconX, iconY;
-
-        switch (settings.get_enum('icon-horizontal-alignment')) {
-        case HorizontalAlignment.LEFT:
-            iconX = cloneX + 3;
-            break;
-
-        case HorizontalAlignment.MIDDLE:
-            iconX = cloneX + (cloneWidth - this._windowOverlayIconsExtension.box.width) / 2;
-            break;
-
-        case HorizontalAlignment.RIGHT:
-            iconX = cloneX + cloneWidth - this._windowOverlayIconsExtension.box.width - 3;
-            break;
-        }
-
-        switch (settings.get_enum('icon-vertical-alignment')) {
-        case VerticalAlignment.TOP:
-            iconY = cloneY + 3;
-            break;
-
-        case VerticalAlignment.MIDDLE:
-            iconY = cloneY + (cloneHeight - this._windowOverlayIconsExtension.box.height) / 2;
-            break;
-
-        case VerticalAlignment.BOTTOM:
-            iconY = cloneY + cloneHeight - this._windowOverlayIconsExtension.box.height - 3;
-            break;
-        }
-
-        if (animate) {
-            this._animateOverlayActor(this._windowOverlayIconsExtension.box,
-                Math.floor(iconX),
-                Math.floor(iconY),
-                this._windowOverlayIconsExtension.box.width);
-        } else {
-            this._windowOverlayIconsExtension.box.set_position(Math.floor(iconX), Math.floor(iconY));
-        }
+    case HorizontalAlignment.RIGHT:
+        return 1;
     }
 }
 
+function getVerticalAlignmentFactorFromAlignmentSetting(verticalAlignmentSetting) {
+    switch (verticalAlignmentSetting) {
+    case VerticalAlignment.TOP:
+        return 0;
+
+    case VerticalAlignment.MIDDLE:
+        return 0.5;
+
+    case VerticalAlignment.BOTTOM:
+        return 1;
+    }
+}
+
+function createApplicationIconForMetaWindow(metaWindow, size) {
+    const tracker = Shell.WindowTracker.get_default();
+    const windowApp = tracker.get_window_app(metaWindow);
+
+    let icon;
+
+    if (windowApp)
+        icon = windowApp.create_icon_texture(size);
+
+    if (!icon) {
+        // fallback to default icon
+        icon = new St.Icon({
+            icon_name: 'application-x-executable',
+            icon_size: size,
+        });
+    }
+
+    return icon;
+}
+
+function enable() {
+    windowPreviewInjections['_init'] = injectAfterFunction(WindowPreview.WindowPreview.prototype, '_init', function () {
+        this._windowOverlayIconsExtension = {};
+        const extension = this._windowOverlayIconsExtension;
+
+        extension.box = new St.Bin({ style_class: 'windowoverlay-application-icon-box' });
+
+        if (settings.get_boolean('icon-size-relative')) {
+            extension.box.add_constraint(new RelativeIconSizeConstraint({
+                source: this._windowContainer,
+                ratio: settings.get_int('icon-size') / 100,
+            }));
+        } else {
+            extension.box.add_constraint(new AbsoluteIconSizeConstraint({
+                source: this._windowContainer,
+                size: settings.get_int('icon-size'),
+            }));
+        }
+
+        extension.box.add_constraint(new Clutter.BindConstraint({
+            source: this._windowContainer,
+            coordinate: Clutter.BindCoordinate.POSITION,
+        }));
+        extension.box.add_constraint(new Clutter.AlignConstraint({
+            source: this._windowContainer,
+            align_axis: Clutter.AlignAxis.X_AXIS,
+            factor: getHorizontalAlignmentFactorFromAlignmentSetting(settings.get_enum('icon-horizontal-alignment')),
+        }));
+        extension.box.add_constraint(new Clutter.AlignConstraint({
+            source: this._windowContainer,
+            align_axis: Clutter.AlignAxis.Y_AXIS,
+            factor: getVerticalAlignmentFactorFromAlignmentSetting(settings.get_enum('icon-vertical-alignment')),
+        }));
+
+        extension.box.connect('destroy', () => {
+            Tweener.removeTweens(this._windowOverlayIconsExtension.box);
+            this._windowOverlayIconsExtension.box = null;
+        });
+
+        extension.box.set_opacity(0);
+
+        const [backgroundColorParseResult, backgroundColor] = Gdk.color_parse(settings.get_string('background-color'));
+        if (backgroundColorParseResult) {
+            extension.box.style = `background-color: rgba(
+                ${backgroundColor.red / 65536 * 256}, 
+                ${backgroundColor.green / 65536 * 256}, 
+                ${backgroundColor.blue / 65536 * 256}, 
+                ${settings.get_int('background-alpha') / 65536 * 256}
+            );`;
+        }
+
+        Shell.util_set_hidden_from_pick(extension.box, true);
+
+        this.add_child(extension.box);
+
+        // Draw the icon below title and close button but above the border.
+        // This makes cases when the icon is bigger than window overlay look better.
+        this.set_child_above_sibling(this._title, extension.box);
+        this.set_child_above_sibling(this._closeButton, extension.box);
+        this.set_child_below_sibling(this._border, extension.box);
+
+        extension.icon = createApplicationIconForMetaWindow(this.metaWindow, INITIAL_ICON_SIZE);
+        extension.box.add_actor(extension.icon);
+
+        Tweener.addTween(extension.box, {
+            time: 0.1,
+            opacity: settings.get_int('icon-opacity-blur'),
+            transition: 'linear',
+        });
+
+        Main.overview.connect('hiding', () => {
+            if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box) {
+                Tweener.addTween(this._windowOverlayIconsExtension.box, {
+                    time: 0.2,
+                    opacity: 0,
+                    transition: 'linear',
+                });
+            }
+        });
+
+        extension.box.connect('notify::size', () => {
+            if (extension.icon) {
+                const boxSize = Math.min(extension.box.size.width, extension.box.size.height);
+                const boxMipmapLevel = Math.ceil(Math.log(boxSize) / Math.LN2);
+
+                const iconSize = extension.icon.icon_size;
+                const iconMipmapLevel = iconSize > 0 ? Math.ceil(Math.log(iconSize) / Math.LN2) : 0;
+
+                if (boxMipmapLevel !== iconMipmapLevel) {
+                    const newIconSize = Math.pow(2, Math.ceil(boxMipmapLevel));
+
+                    const newIcon = createApplicationIconForMetaWindow(this.metaWindow, newIconSize);
+
+                    extension.box.remove_actor(extension.icon);
+                    extension.icon = newIcon;
+                    extension.box.add_actor(extension.icon);
+                }
+            }
+        });
+    });
+
+    windowPreviewInjections['showOverlay'] = injectAfterFunction(WindowPreview.WindowPreview.prototype, 'showOverlay', function (animate) {
+        if (this._windowOverlayIconsExtension) {
+            const extension = this._windowOverlayIconsExtension;
+
+            if (extension.box) {
+                if (animate) {
+                    Tweener.addTween(extension.box, {
+                        time: 0.2,
+                        opacity: settings.get_int('icon-opacity-focus'),
+                        transition: 'linear',
+                    });
+                }
+            }
+        }
+    });
+
+    windowPreviewInjections['hideOverlay'] = injectAfterFunction(WindowPreview.WindowPreview.prototype, 'hideOverlay', function (animate) {
+        if (this._windowOverlayIconsExtension) {
+            const extension = this._windowOverlayIconsExtension;
+
+            if (extension.box) {
+                if (animate) {
+                    Tweener.addTween(extension.box, {
+                        time: 0.2,
+                        opacity: settings.get_int('icon-opacity-blur'),
+                        transition: 'linear',
+                    });
+                }
+            }
+        }
+    });
+
+    windowPreviewInjections['_onDestroy'] = injectAfterFunction(WindowPreview.WindowPreview.prototype, '_onDestroy', () => {
+        if (this._windowOverlayIconsExtension && this._windowOverlayIconsExtension.box)
+            this._windowOverlayIconsExtension.box.destroy();
+    });
+}
+
 function disable() {
-    Workspace.WindowOverlay = originalWindowOverlay;
+    for (let i in windowPreviewInjections)
+        removeInjection(WindowPreview.WindowPreview.prototype, windowPreviewInjections, i);
 }
 
 function init() {
-    originalWindowOverlay = Workspace.WindowOverlay;
     settings = Convenience.getSettings(PREFS_SCHEMA);
 }
 

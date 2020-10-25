@@ -31,6 +31,7 @@ zip: all
 		COPYING \
 		README.md \
 		*.js \
+		libs/*.js \
 		metadata.json \
 		prefs.xml \
 		stylesheet.css \

@@ -1,4 +1,4 @@
-/* exported init, buildPrefsWidget */
+/* exported init, buildPrefsWidget, HorizontalAlignment, VerticalAlignment */
 
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
@@ -12,7 +12,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
 const PREFS_UI = `${Me.dir.get_path()}/prefs.xml`;
-const PREFS_SCHEMA = 'org.gnome.shell.extensions.windowoverlay-icons';
+var PREFS_SCHEMA = 'org.gnome.shell.extensions.windowoverlay-icons';
 
 const Alignment = {
     TOP_LEFT: 1,
@@ -26,13 +26,13 @@ const Alignment = {
     BOTTOM_RIGHT: 9,
 };
 
-const HorizontalAlignment = {
+var HorizontalAlignment = {
     LEFT: 1,
     MIDDLE: 2,
     RIGHT: 3,
 };
 
-const VerticalAlignment = {
+var VerticalAlignment = {
     TOP: 1,
     MIDDLE: 2,
     BOTTOM: 3,
