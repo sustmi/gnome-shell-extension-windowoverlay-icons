@@ -3,6 +3,8 @@
 
 Adds application icons to the windows overview (in Activities menu).
 
+[Install from extensions.gnome.org](https://extensions.gnome.org/extension/302/windowoverlay-icons/)
+
 ## Example
 ![windowoverlay icons example](https://user-images.githubusercontent.com/925062/28873575-9378636a-778e-11e7-90a1-8e2f3a4d7f43.png)
 
