@@ -26,6 +26,11 @@ locales: $(po_files)
 		msgfmt -o ./locale/$$LOCALE/LC_MESSAGES/windowoverlay-icons.mo ./po/$$LOCALE.po; \
 	done
 
+increase_version:
+	jq --indent 4 ".version |= .+1" < metadata.json | sponge metadata.json
+
+release: increase_version zip
+
 zip: all
 	zip -rq windowoverlay-icons.zip \
 		COPYING \
