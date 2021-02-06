@@ -198,7 +198,13 @@ function enable() {
             }
         });
 
-        extension.box.connect('notify::size', () => {
+        // We listen to "queue_redraw" signal here in order to update the icon size. Signal "notify::size" would make
+        // more sense but it caused strange problems with allocations and emitted warnings like:
+        // "Can't update stage views actor StIcon is on because it needs an allocation."
+        // It seems that the problem happens when child elements change size during parents "notify::size" signal.
+        // Listening to "paint" signal strangely makes the animation choppier. Maybe it causes extra repaints
+        // when icon size changes during paint.
+        extension.box.connect('queue_redraw', () => {
             if (extension.icon) {
                 const boxSize = Math.min(extension.box.size.width, extension.box.size.height);
                 const boxMipmapLevel = Math.ceil(Math.log(boxSize) / Math.LN2);
@@ -206,15 +212,8 @@ function enable() {
                 const iconSize = extension.icon.icon_size;
                 const iconMipmapLevel = iconSize > 0 ? Math.ceil(Math.log(iconSize) / Math.LN2) : 0;
 
-                if (boxMipmapLevel !== iconMipmapLevel) {
-                    const newIconSize = Math.pow(2, Math.ceil(boxMipmapLevel));
-
-                    const newIcon = createApplicationIconForMetaWindow(this.metaWindow, newIconSize);
-
-                    extension.box.remove_actor(extension.icon);
-                    extension.icon = newIcon;
-                    extension.box.add_actor(extension.icon);
-                }
+                if (boxMipmapLevel !== iconMipmapLevel)
+                    extension.icon.icon_size = Math.pow(2, Math.ceil(boxMipmapLevel));
             }
         });
     });
