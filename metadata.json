@@ -6,5 +6,5 @@
     "url": "https://github.com/sustmi/gnome-shell-extension-windowoverlay-icons",
     "settings-schema": "org.gnome.shell.extensions.windowoverlay-icons",
     "gettext-domain": "windowoverlay-icons",
-    "version": 35
+    "version": 39
 }
