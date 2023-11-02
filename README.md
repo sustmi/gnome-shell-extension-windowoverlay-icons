@@ -1,5 +1,12 @@
-# WindowPreview (formerly WindowOverlay) Icons Extension 
-<a href="https://www.buymeacoffee.com/sustmi" target="_blank" title="Donate to this project using Buy Me A Coffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg" alt="Buy Me A Coffee donate button" /></a>
+# Repository is not maintained
+Since v40, GNOME Shell has [built-in feature that shows application icons in Activities](https://help.gnome.org/misc/release-notes/40.0/#activities-overview).
+So 10 years after releasing the first version of this extension ([which was made for GNOME Shell 3.0.2](https://github.com/sustmi/gnome-shell-extensions-sustmi/commit/f035f8a781a11727e67e79f91471c18b3d1f310f))
+it is not needed anymore. What a ride! :)
+
+---
+
+# WindowPreview (formerly WindowOverlay) Icons Extension
+![Maintenance](https://img.shields.io/maintenance/no/2021)
 
 Adds application icons to the windows overview (in Activities menu).
 
